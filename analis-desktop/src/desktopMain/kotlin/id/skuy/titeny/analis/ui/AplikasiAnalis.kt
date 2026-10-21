@@ -49,7 +49,7 @@ fun AplikasiAnalis(navigator: Navigator, layanan: Layanan) {
                 entry<Rute.TahanPrediksi> { Placeholder("Tahan Prediksi", "tiket lanjutan") }
                 entry<Rute.BandingModel> { Placeholder("Bandingkan Model", "tiket lanjutan") }
                 entry<Rute.KelolaRekomendasi> { Placeholder("Kelola Rekomendasi", "tiket lanjutan") }
-                entry<Rute.Ekspor> { Placeholder("Ekspor", "TTN-KMP-005") }
+                entry<Rute.Ekspor> { LayarEkspor(layanan) }
             },
         )
     }
