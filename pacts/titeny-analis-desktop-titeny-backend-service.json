@@ -1,0 +1,646 @@
+{
+  "consumer": {
+    "name": "titeny-analis-desktop"
+  },
+  "interactions": [
+    {
+      "description": "antrean validasi analis",
+      "providerStates": [
+        {
+          "name": "ada event perlu_verifikasi yang belum diputuskan"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer token-uji-analis"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer .+"
+                }
+              ]
+            }
+          },
+          "query": {
+            "limit": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "\\d+"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/api/v1/analis/antrean",
+        "query": {
+          "limit": [
+            "50"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "data": [
+            {
+              "alasan_flag": "harga di luar rentang",
+              "event_id": "evt_20261004_000123",
+              "event_type": "harga_lapak",
+              "flag": "perlu_verifikasi"
+            }
+          ],
+          "next_cursor": null
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.data": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.data[*].alasan_flag": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.data[*].event_id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^evt_\\d{8}_\\d{6}$"
+                }
+              ]
+            },
+            "$.data[*].event_type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "login analis (langkah 1)",
+      "providerStates": [
+        {
+          "name": "akun analis ada dan kata sandi benar"
+        }
+      ],
+      "request": {
+        "body": {
+          "password": "kata-sandi-uji",
+          "username": "analis01"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.password": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.username": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/v1/auth/login"
+      },
+      "response": {
+        "body": {
+          "otp_diperlukan": true,
+          "sesi_id": "ses_abc123"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.sesi_id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "keputusan dengan alasan di bawah 10 karakter",
+      "providerStates": [
+        {
+          "name": "event evt_20261004_000123 berstatus perlu_verifikasi"
+        }
+      ],
+      "request": {
+        "body": {
+          "aksi_id": "aks_20261004_009",
+          "alasan": "pendek",
+          "event_id": "evt_20261004_000123",
+          "keputusan": "tolak"
+        },
+        "headers": {
+          "Authorization": "Bearer token-uji-analis",
+          "Content-Type": "application/json",
+          "X-Idempotency-Key": "aks_20261004_009"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer .+"
+                }
+              ]
+            },
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/v1/analis/validasi"
+      },
+      "response": {
+        "body": {
+          "error": {
+            "field": "alasan",
+            "kode": "validasi_gagal",
+            "pesan": "alasan harus 10-140 karakter."
+          }
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.error.pesan": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 422
+      }
+    },
+    {
+      "description": "keputusan koreksi_nilai analis",
+      "providerStates": [
+        {
+          "name": "event evt_20261004_000123 berstatus perlu_verifikasi"
+        }
+      ],
+      "request": {
+        "body": {
+          "aksi_id": "aks_20261004_001",
+          "alasan": "Salah input lapak 042, nota terlampir.",
+          "event_id": "evt_20261004_000123",
+          "keputusan": "koreksi_nilai",
+          "nilai_baru": 41000
+        },
+        "headers": {
+          "Authorization": "Bearer token-uji-analis",
+          "Content-Type": "application/json",
+          "X-Idempotency-Key": "aks_20261004_001"
+        },
+        "matchingRules": {
+          "body": {
+            "$.alasan": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.nilai_baru": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer .+"
+                }
+              ]
+            },
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/v1/analis/validasi"
+      },
+      "response": {
+        "body": {
+          "status": "diterima"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "baca prediksi harga",
+      "providerStates": [
+        {
+          "name": "pasangan komoditas-pasar punya prediksi harga"
+        }
+      ],
+      "request": {
+        "headers": {
+          "Authorization": "Bearer token-uji-analis"
+        },
+        "matchingRules": {
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer .+"
+                }
+              ]
+            }
+          }
+        },
+        "method": "GET",
+        "path": "/api/v1/harga",
+        "query": {
+          "komoditas_id": [
+            "cmd_cabai_merah"
+          ],
+          "pasar_id": [
+            "psr_jakarta_timur_01"
+          ]
+        }
+      },
+      "response": {
+        "body": {
+          "deret": [
+            {
+              "harga_prediksi": 42500,
+              "horizon": "H+1",
+              "kepercayaan": "sedang",
+              "rentang_atas": 46000,
+              "rentang_bawah": 39000,
+              "tanggal": "2026-10-05"
+            }
+          ],
+          "dihitung_pada": "2026-10-04T23:00:00Z",
+          "komoditas_id": "cmd_cabai_merah",
+          "model_version": "harga_v1.0.0",
+          "pasar_id": "psr_jakarta_timur_01"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.deret": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type",
+                  "min": 1
+                }
+              ]
+            },
+            "$.deret[*].harga_prediksi": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.deret[*].horizon": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.deret[*].kepercayaan": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.deret[*].rentang_atas": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.deret[*].rentang_bawah": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.deret[*].tanggal": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              ]
+            },
+            "$.dihitung_pada": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.model_version": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "tahan prediksi komoditas-pasar",
+      "providerStates": [
+        {
+          "name": "pasangan komoditas-pasar punya prediksi harga"
+        }
+      ],
+      "request": {
+        "body": {
+          "aksi_id": "aks_20261004_002",
+          "alasan": "Sampel hanya 2 lapak.",
+          "berlaku_sampai": "2026-10-07",
+          "komoditas_id": "cmd_cabai_merah",
+          "pasar_id": "psr_jakarta_timur_01"
+        },
+        "headers": {
+          "Authorization": "Bearer token-uji-analis",
+          "Content-Type": "application/json",
+          "X-Idempotency-Key": "aks_20261004_002"
+        },
+        "matchingRules": {
+          "body": {
+            "$.alasan": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.berlaku_sampai": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Authorization": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "Bearer .+"
+                }
+              ]
+            },
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/v1/analis/tahan"
+      },
+      "response": {
+        "body": {
+          "status": "diterima"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.status": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "diterima|duplikat_diabaikan"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    },
+    {
+      "description": "verifikasi OTP analis (langkah 2)",
+      "providerStates": [
+        {
+          "name": "sesi OTP analis aktif"
+        }
+      ],
+      "request": {
+        "body": {
+          "otp": "123456",
+          "sesi_id": "ses_abc123"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.otp": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.sesi_id": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          },
+          "header": {
+            "Content-Type": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "regex",
+                  "regex": "application/json.*"
+                }
+              ]
+            }
+          }
+        },
+        "method": "POST",
+        "path": "/api/v1/auth/otp/verifikasi"
+      },
+      "response": {
+        "body": {
+          "access_token": "aaa.bbb.ccc",
+          "expires_in": 900,
+          "peran": "analis",
+          "refresh_token": "refresh-baru",
+          "token_type": "Bearer"
+        },
+        "headers": {
+          "Content-Type": "application/json"
+        },
+        "matchingRules": {
+          "body": {
+            "$.access_token": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            },
+            "$.expires_in": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "integer"
+                }
+              ]
+            },
+            "$.refresh_token": {
+              "combine": "AND",
+              "matchers": [
+                {
+                  "match": "type"
+                }
+              ]
+            }
+          }
+        },
+        "status": 200
+      }
+    }
+  ],
+  "metadata": {
+    "pact-jvm": {
+      "version": "4.6.21"
+    },
+    "pactSpecification": {
+      "version": "3.0.0"
+    }
+  },
+  "provider": {
+    "name": "titeny-backend-service"
+  }
+}
