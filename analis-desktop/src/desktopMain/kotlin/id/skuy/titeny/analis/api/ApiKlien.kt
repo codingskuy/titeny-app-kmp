@@ -26,8 +26,18 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
+
+/** Aksi tulis analis (diimplementasikan [ApiKlien]; dipisah agar antrean luring dapat diuji tanpa jaringan). */
+interface PengirimAksi {
+    suspend fun validasi(aksi: ValidasiAnalis): Hasil<EventDiterima>
+    suspend fun tahan(aksi: TahanPrediksi): Hasil<EventDiterima>
+}
+
+/** Prediksi harga (GET /api/v1/harga). */
+interface SumberPrediksi {
+    suspend fun harga(komoditasId: String, pasarId: String, dari: String? = null, sampai: String? = null): Hasil<PrediksiHargaRespons>
+}
 
 /** Sumber antrean validasi (diimplementasikan [ApiKlien]; dipisah agar pengelola dapat diuji tanpa jaringan). */
 interface SumberAntrean {
@@ -59,11 +69,8 @@ class ApiKlien(
     private val baseUrl: String,
     private val penyimpan: PenyimpanToken,
     private val jam: () -> Long = System::currentTimeMillis,
-) : SumberAntrean {
-    private val json = Json {
-        ignoreUnknownKeys = true
-        explicitNulls = false // nilai_baru dilarang untuk keputusan selain koreksi_nilai: jangan kirim null
-    }
+) : SumberAntrean, PengirimAksi, SumberPrediksi {
+    private val json = FormatJson.json
 
     private val http = HttpClient(engine) {
         install(ContentNegotiation) { json(json) }
@@ -130,7 +137,7 @@ class ApiKlien(
             cursor?.let { parameter("cursor", it) }
         }.keHasil()
 
-    suspend fun validasi(aksi: ValidasiAnalis): Hasil<EventDiterima> =
+    override suspend fun validasi(aksi: ValidasiAnalis): Hasil<EventDiterima> =
         kirim(auth = true) {
             method = HttpMethod.Post
             ke("/api/v1/analis/validasi")
@@ -139,13 +146,23 @@ class ApiKlien(
             setBody(aksi)
         }.keHasil()
 
-    suspend fun tahan(aksi: TahanPrediksi): Hasil<EventDiterima> =
+    override suspend fun tahan(aksi: TahanPrediksi): Hasil<EventDiterima> =
         kirim(auth = true) {
             method = HttpMethod.Post
             ke("/api/v1/analis/tahan")
             header("X-Idempotency-Key", aksi.aksiId)
             contentType(ContentType.Application.Json)
             setBody(aksi)
+        }.keHasil()
+
+    override suspend fun harga(komoditasId: String, pasarId: String, dari: String?, sampai: String?): Hasil<PrediksiHargaRespons> =
+        kirim(auth = true) {
+            method = HttpMethod.Get
+            ke("/api/v1/harga")
+            parameter("komoditas_id", komoditasId)
+            parameter("pasar_id", pasarId)
+            dari?.let { parameter("dari", it) }
+            sampai?.let { parameter("sampai", it) }
         }.keHasil()
 
     // ---------- internal

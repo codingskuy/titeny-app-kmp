@@ -88,3 +88,31 @@ data class GalatBody(val error: GalatIsi)
 
 @Serializable
 data class GalatIsi(val kode: String, val pesan: String, val field: String? = null)
+
+/** Konfigurasi JSON tunggal: `nilai_baru` dilarang untuk keputusan selain koreksi_nilai, jadi null tidak dikirim. */
+object FormatJson {
+    val json = kotlinx.serialization.json.Json {
+        ignoreUnknownKeys = true
+        explicitNulls = false
+    }
+}
+
+@Serializable
+data class PrediksiHarga(
+    val tanggal: String,
+    val horizon: String,
+    @SerialName("harga_prediksi") val hargaPrediksi: Long,
+    @SerialName("rentang_bawah") val rentangBawah: Long,
+    @SerialName("rentang_atas") val rentangAtas: Long,
+    val kepercayaan: String,
+    @SerialName("alasan_singkat") val alasanSingkat: String? = null,
+)
+
+@Serializable
+data class PrediksiHargaRespons(
+    @SerialName("komoditas_id") val komoditasId: String,
+    @SerialName("pasar_id") val pasarId: String,
+    val deret: List<PrediksiHarga>,
+    @SerialName("model_version") val modelVersion: String,
+    @SerialName("dihitung_pada") val dihitungPada: String,
+)

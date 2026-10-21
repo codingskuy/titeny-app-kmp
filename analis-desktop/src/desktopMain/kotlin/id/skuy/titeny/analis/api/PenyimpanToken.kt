@@ -4,6 +4,7 @@ package id.skuy.titeny.analis.api
  * Token sesi analis. `sesiBerakhirPadaMs` = waktu OTP + 8 jam (batas sesi analis);
  * akses JWT sendiri 15 menit dan refresh 7 hari (standar KONTEKS/AGENTS, bukan "8 jam").
  */
+@kotlinx.serialization.Serializable
 data class SesiToken(
     val accessToken: String,
     val refreshToken: String,
