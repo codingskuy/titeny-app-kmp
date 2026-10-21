@@ -13,6 +13,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import id.skuy.titeny.analis.antrean.StateAntrean
+import id.skuy.titeny.analis.cache.bannerLuring
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
@@ -28,7 +32,10 @@ private val tanpaAnimasi: () -> ContentTransform = { EnterTransition.None togeth
 @Composable
 fun AplikasiAnalis(navigator: Navigator, layanan: Layanan) {
     Column(Modifier.fillMaxSize()) {
-        if (navigator.sudahMasuk) BilahNavigasi(navigator, layanan)
+        if (navigator.sudahMasuk) {
+            BilahNavigasi(navigator, layanan)
+            StatusSinkron(layanan)
+        }
         NavDisplay(
             backStack = navigator.tumpukan,
             onBack = { navigator.kembali() },
@@ -66,5 +73,18 @@ private fun Placeholder(judul: String, tiket: String) {
     Column(Modifier.padding(24.dp).testTag("layar-$judul")) {
         Text(judul, style = MaterialTheme.typography.headlineSmall)
         Text("Isi layar dikerjakan di $tiket.")
+    }
+}
+
+/** Banner luring (stempel data terakhir) dan jumlah aksi menunggu kirim. */
+@Composable
+private fun StatusSinkron(layanan: Layanan) {
+    val state by layanan.antrean.state.collectAsState()
+    val menunggu by layanan.aksi.menunggu.collectAsState()
+    Column(Modifier.padding(horizontal = 16.dp)) {
+        (state as? StateAntrean.Luring)?.let {
+            Text(bannerLuring(it.stempelMs), color = TemaTiteny.bannerLuring, modifier = Modifier.testTag("status-luring"))
+        }
+        if (menunggu > 0) Text("$menunggu aksi menunggu dikirim (terkirim otomatis saat daring).", modifier = Modifier.testTag("status-menunggu"))
     }
 }

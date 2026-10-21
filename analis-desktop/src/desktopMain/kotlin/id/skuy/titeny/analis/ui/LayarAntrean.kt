@@ -22,6 +22,7 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
 import id.skuy.titeny.analis.antrean.StateAntrean
 import id.skuy.titeny.analis.api.AntreanItem
+import id.skuy.titeny.analis.cache.bannerLuring
 import id.skuy.titeny.analis.nav.Navigator
 import id.skuy.titeny.analis.nav.Rute
 import java.time.Instant
@@ -56,6 +57,10 @@ fun LayarAntrean(navigator: Navigator, layanan: Layanan) {
             StateAntrean.Memuat -> Text("Memuat antrean...")
             is StateAntrean.Siap -> {
                 Text("Diperbarui ${FORMAT_JAM.format(Instant.ofEpochMilli(s.diperbaruiMs))} WIB; ${s.item.size} flag.")
+                Tabel(s.item) { navigator.buka(Rute.DetailFlag(it.eventId)) }
+            }
+            is StateAntrean.Luring -> {
+                Text(bannerLuring(s.stempelMs), color = TemaTiteny.bannerLuring, modifier = Modifier.testTag("banner-luring"))
                 Tabel(s.item) { navigator.buka(Rute.DetailFlag(it.eventId)) }
             }
             is StateAntrean.Gagal -> {

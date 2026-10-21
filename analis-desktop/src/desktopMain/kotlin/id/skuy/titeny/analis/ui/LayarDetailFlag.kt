@@ -20,7 +20,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
-import id.skuy.titeny.analis.api.Hasil
+import id.skuy.titeny.analis.aksi.HasilKirim
 import id.skuy.titeny.analis.api.Keputusan
 import id.skuy.titeny.analis.nav.Navigator
 import id.skuy.titeny.analis.validasi.ALASAN_MAKS
@@ -84,14 +84,17 @@ fun LayarDetailFlag(eventId: String, navigator: Navigator, layanan: Layanan) {
                 val req = form.keRequest(aksiId, eventId) ?: return@Button
                 sibuk = true; pesan = null
                 scope.launch {
-                    when (val r = layanan.api.validasi(req)) {
-                        is Hasil.Berhasil -> {
+                    when (val r = layanan.aksi.kirimAtauAntre(req)) {
+                        is HasilKirim.Terkirim -> {
                             layanan.antrean.hapusLokal(eventId)
                             navigator.kembali()
                         }
-                        is Hasil.Galat -> pesan = pesanGalat(r)
-                        // 004 mengantre aksi saat luring; sebelum itu analis diminta mencoba lagi (aksi_id sama).
-                        is Hasil.Jaringan -> pesan = "Tidak dapat terhubung ke server; coba kirim lagi (aksi sama, aman diulang)."
+                        // Luring: aksi tersimpan di SQLite dengan aksi_id yang sama dan terkirim saat daring.
+                        HasilKirim.Diantre -> {
+                            layanan.antrean.hapusLokal(eventId)
+                            navigator.kembali()
+                        }
+                        is HasilKirim.Ditolak -> pesan = pesanGalat(r.galat)
                     }
                     sibuk = false
                 }

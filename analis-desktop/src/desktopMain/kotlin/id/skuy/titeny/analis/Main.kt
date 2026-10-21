@@ -14,7 +14,11 @@ import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
 import id.skuy.titeny.analis.api.ApiKlien
 import id.skuy.titeny.analis.api.Konfigurasi
-import id.skuy.titeny.analis.api.PenyimpanTokenMemori
+import id.skuy.titeny.analis.cache.Basisdata
+import id.skuy.titeny.analis.cache.LokasiDb
+import id.skuy.titeny.analis.token.buatPenyimpanToken
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import id.skuy.titeny.analis.nav.Navigator
 import id.skuy.titeny.analis.ui.Layanan
 import io.ktor.client.engine.cio.CIO
@@ -30,7 +34,13 @@ const val TINGGI_MIN = 720
 fun main(args: Array<String>) = application {
     val navigator = remember { Navigator() }
     val layanan = remember {
-        Layanan(ApiKlien(CIO.create(), Konfigurasi.urlApi(), PenyimpanTokenMemori()))
+        val basis = Basisdata.buka(LokasiDb.tentukan())
+        Layanan(ApiKlien(CIO.create(), Konfigurasi.urlApi(), buatPenyimpanToken()), basis)
+    }
+
+    LaunchedEffect(Unit) {
+        // Pangkas usia/ukuran + VACUUM mingguan di luar thread UI.
+        withContext(Dispatchers.IO) { runCatching { layanan.pemeliharaan.jalankan() } }
     }
 
     LaunchedEffect(Unit) {
