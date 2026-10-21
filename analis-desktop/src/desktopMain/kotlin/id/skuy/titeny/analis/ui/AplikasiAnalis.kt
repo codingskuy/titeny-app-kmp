@@ -31,11 +31,7 @@ private val tanpaAnimasi: () -> ContentTransform = { EnterTransition.None togeth
 
 @Composable
 fun AplikasiAnalis(navigator: Navigator, layanan: Layanan) {
-    Column(Modifier.fillMaxSize()) {
-        if (navigator.sudahMasuk) {
-            BilahNavigasi(navigator, layanan)
-            StatusSinkron(layanan)
-        }
+    KerangkaAnalis(navigator, layanan) {
         NavDisplay(
             backStack = navigator.tumpukan,
             onBack = { navigator.kembali() },
@@ -43,15 +39,41 @@ fun AplikasiAnalis(navigator: Navigator, layanan: Layanan) {
             popTransitionSpec = { tanpaAnimasi() },
             predictivePopTransitionSpec = { tanpaAnimasi() },
             entryProvider = entryProvider {
-                entry<Rute.Masuk> { LayarMasuk(navigator, layanan) }
-                entry<Rute.AntreanValidasi> { LayarAntrean(navigator, layanan) }
-                entry<Rute.DetailFlag> { LayarDetailFlag(it.eventId, navigator, layanan) }
-                entry<Rute.TahanPrediksi> { Placeholder("Tahan Prediksi", "tiket lanjutan") }
-                entry<Rute.BandingModel> { Placeholder("Bandingkan Model", "tiket lanjutan") }
-                entry<Rute.KelolaRekomendasi> { Placeholder("Kelola Rekomendasi", "tiket lanjutan") }
-                entry<Rute.Ekspor> { LayarEkspor(layanan) }
+                entry<Rute.Masuk> { IsiRute(it, navigator, layanan) }
+                entry<Rute.AntreanValidasi> { IsiRute(it, navigator, layanan) }
+                entry<Rute.DetailFlag> { IsiRute(it, navigator, layanan) }
+                entry<Rute.TahanPrediksi> { IsiRute(it, navigator, layanan) }
+                entry<Rute.BandingModel> { IsiRute(it, navigator, layanan) }
+                entry<Rute.KelolaRekomendasi> { IsiRute(it, navigator, layanan) }
+                entry<Rute.Ekspor> { IsiRute(it, navigator, layanan) }
             },
         )
+    }
+}
+
+/** Bilah navigasi + status sinkron di atas [isi]; dipisah agar uji UI dapat memakai host tanpa NavDisplay. */
+@Composable
+internal fun KerangkaAnalis(navigator: Navigator, layanan: Layanan, isi: @Composable () -> Unit) {
+    Column(Modifier.fillMaxSize()) {
+        if (navigator.sudahMasuk) {
+            BilahNavigasi(navigator, layanan)
+            StatusSinkron(layanan)
+        }
+        isi()
+    }
+}
+
+/** Layar untuk satu rute (satu-satunya pemetaan rute ke layar). */
+@Composable
+internal fun IsiRute(rute: Rute, navigator: Navigator, layanan: Layanan) {
+    when (rute) {
+        Rute.Masuk -> LayarMasuk(navigator, layanan)
+        Rute.AntreanValidasi -> LayarAntrean(navigator, layanan)
+        is Rute.DetailFlag -> LayarDetailFlag(rute.eventId, navigator, layanan)
+        Rute.TahanPrediksi -> Placeholder("Tahan Prediksi", "tiket lanjutan")
+        Rute.BandingModel -> Placeholder("Bandingkan Model", "tiket lanjutan")
+        Rute.KelolaRekomendasi -> Placeholder("Kelola Rekomendasi", "tiket lanjutan")
+        Rute.Ekspor -> LayarEkspor(layanan)
     }
 }
 
