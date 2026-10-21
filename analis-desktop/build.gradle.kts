@@ -20,6 +20,8 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(compose.material3)
+                implementation(libs.navigation3.ui)
+                implementation(libs.lifecycle.viewmodel.savedstate)
                 implementation(libs.coroutines.core)
                 implementation(libs.ktor.client.core)
             }
