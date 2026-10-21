@@ -4,6 +4,8 @@ import id.skuy.titeny.analis.api.AntreanItem
 import id.skuy.titeny.analis.api.AntreanValidasi
 import id.skuy.titeny.analis.api.Hasil
 import id.skuy.titeny.analis.api.SumberAntrean
+import id.skuy.titeny.analis.cache.Basisdata
+import id.skuy.titeny.analis.cache.CacheAnalis
 import java.io.IOException
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -24,8 +26,10 @@ class PengelolaAntreanTest {
     private var gagalJaringan = false
     private val halamanKe = mutableListOf<String?>()
 
-    private fun pengelola(): PengelolaAntrean {
-        val sumber = object : SumberAntrean {
+    private fun pengelola(): PengelolaAntrean = PengelolaAntrean(sumberPalsu(), jam = { 42L }, halaman = 2)
+
+    private fun sumberPalsu(): SumberAntrean {
+        return object : SumberAntrean {
             override suspend fun antrean(limit: Int, cursor: String?): Hasil<AntreanValidasi> {
                 hit++
                 if (gagalJaringan) return Hasil.Jaringan(IOException("putus"))
@@ -38,7 +42,6 @@ class PengelolaAntreanTest {
                 )
             }
         }
-        return PengelolaAntrean(sumber, jam = { 42L }, halaman = 2)
     }
 
     @Test
@@ -52,14 +55,59 @@ class PengelolaAntreanTest {
     }
 
     @Test
-    fun galatJaringanMempertahankanDataTerakhir() = runTest {
+    fun jaringanPutusSetelahSiapMenjadiLuringDenganStempelTerakhir() = runTest {
         val m = pengelola()
         m.muat()
         gagalJaringan = true
         m.muat()
-        val s = assertIs<StateAntrean.Gagal>(m.state.value)
+        val s = assertIs<StateAntrean.Luring>(m.state.value)
         assertEquals(3, s.item.size)
-        assertEquals(42L, s.diperbaruiMs)
+        assertEquals(42L, s.stempelMs)
+    }
+
+    @Test
+    fun aplikasiBaruDibukaLuringMemakaiCacheSqlite() = runTest {
+        Basisdata.buka(null).use { b ->
+            val cache = CacheAnalis(b.db)
+            cache.simpanAntrean(listOf(item(7)), 1_000L)
+            gagalJaringan = true
+            val m = PengelolaAntrean(sumberPalsu(), jam = { 42L }, cache = cache)
+            m.muat()
+            assertEquals(StateAntrean.Luring(listOf(item(7)), 1_000L), m.state.value)
+            assertEquals(item(7), m.cari(item(7).eventId))
+        }
+    }
+
+    @Test
+    fun luringTanpaCacheMenjadiGagal() = runTest {
+        gagalJaringan = true
+        val m = pengelola()
+        m.muat()
+        assertIs<StateAntrean.Gagal>(m.state.value)
+    }
+
+    @Test
+    fun muatBerhasilMenyimpanCacheDanMemanggilSebelumMuat() = runTest {
+        Basisdata.buka(null).use { b ->
+            val cache = CacheAnalis(b.db)
+            var dipanggil = 0
+            val m = PengelolaAntrean(sumberPalsu(), jam = { 42L }, halaman = 2, cache = cache, sebelumMuat = { dipanggil++ })
+            m.muat()
+            assertEquals(1, dipanggil)
+            assertEquals(3, cache.bacaAntrean()?.item?.size)
+            assertEquals(42L, cache.bacaAntrean()?.stempelMs)
+        }
+    }
+
+    @Test
+    fun serverMati5xxDiperlakukanLuring() = runTest {
+        val m = PengelolaAntrean(object : SumberAntrean {
+            override suspend fun antrean(limit: Int, cursor: String?): Hasil<AntreanValidasi> = Hasil.Galat(503, null, "tidak tersedia")
+        }, jam = { 1L })
+        m.muat()
+        assertIs<StateAntrean.Gagal>(m.state.value) // belum ada data sama sekali
+        val ok = pengelola()
+        ok.muat()
     }
 
     @Test
