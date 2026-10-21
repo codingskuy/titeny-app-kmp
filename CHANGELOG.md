@@ -6,3 +6,4 @@ Format: satu seksi per rilis, terbaru di atas. Wajib diperbarui pada setiap comm
 
 ### Ditambahkan
 - Fondasi AI-dev v1.0.0: `AGENTS.md`, `CLAUDE.md`, `docs/decisions/ADR-0001-fondasi-teknis.md`, `versions/v1.0.0/docs/40-TECHSTACK.md` dan `60-BLAST-RADIUS.md` (versi lengkap, menggantikan ringkasan awal).
+- ADR-0003 `docs/decisions/ADR-0003-versi-toolchain.md`: kunci Compose Multiplatform 1.10.0, Navigation3 1.1.x, kotlinx-datetime 0.7.1.
