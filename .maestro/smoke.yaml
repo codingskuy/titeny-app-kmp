@@ -1,0 +1,25 @@
+# Smoke: aplikasi terbuka di layar Masuk dan tombol Masuk menunggu isian.
+# Padanan eksekusi desktop: AlurUiTest.smokeLayarMasukTampilDanTombolMenungguIsian
+appId: id.skuy.titeny.analis
+name: Smoke masuk analis
+---
+- launchApp:
+    clearState: true
+- assertVisible:
+    id: layar-masuk
+- assertVisible:
+    id: masuk-username
+- assertVisible:
+    id: masuk-password
+# Tombol nonaktif sampai nama pengguna dan kata sandi terisi.
+- assertNotVisible:
+    id: masuk-pesan
+- tapOn:
+    id: masuk-username
+- inputText: ${TITENY_USERNAME}
+- tapOn:
+    id: masuk-password
+- inputText: ${TITENY_PASSWORD}
+- assertVisible:
+    id: masuk-kirim
+    enabled: true

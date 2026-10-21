@@ -1,0 +1,6 @@
+# Maestro (TTN-KMP-TEST-MAESTRO). Selector = testTag Compose (lihat docs/testing/maestro.md dan ADR-0005).
+# PERHATIAN: Maestro tidak mendukung Compose Desktop; berkas ini disiapkan untuk target yang didukung
+# (Android/iOS saat baca-mobile hidup). Padanan yang DIJALANKAN untuk desktop: AlurUiTest.
+flows:
+  - smoke.yaml
+  - validasi-flag.yaml

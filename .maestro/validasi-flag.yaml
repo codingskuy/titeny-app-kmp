@@ -1,0 +1,54 @@
+# Alur validasi flag: masuk (kata sandi + OTP), buka flag dari antrean, putuskan Tolak dengan alasan.
+# Env (JANGAN di-commit): TITENY_USERNAME, TITENY_PASSWORD, TITENY_OTP (OTP dev), TITENY_EVENT_ID (evt_YYYYMMDD_NNNNNN).
+# Padanan eksekusi desktop: AlurUiTest.alurMasukOtpAntreanDetailValidasiTolak
+appId: id.skuy.titeny.analis
+name: Validasi flag (tolak)
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: masuk-username
+- inputText: ${TITENY_USERNAME}
+- tapOn:
+    id: masuk-password
+- inputText: ${TITENY_PASSWORD}
+- tapOn:
+    id: masuk-kirim
+- extendedWaitUntil:
+    visible:
+      id: masuk-otp
+    timeout: 10000
+- tapOn:
+    id: masuk-otp
+- inputText: ${TITENY_OTP}
+- tapOn:
+    id: masuk-otp-kirim
+- extendedWaitUntil:
+    visible:
+      id: layar-antrean
+    timeout: 10000
+- tapOn:
+    id: antrean-baris-${TITENY_EVENT_ID}
+- assertVisible:
+    id: layar-detail-flag
+# Alasan 10-140 karakter; di bawah itu tombol kirim tetap nonaktif.
+- tapOn:
+    id: keputusan-Tolak
+- tapOn:
+    id: detail-alasan
+- inputText: pendek
+- assertVisible:
+    id: detail-kirim
+    enabled: false
+- inputText: " alasan cukup panjang untuk uji"
+- assertVisible:
+    id: detail-kirim
+    enabled: true
+- tapOn:
+    id: detail-kirim
+- extendedWaitUntil:
+    visible:
+      id: layar-antrean
+    timeout: 10000
+- assertNotVisible:
+    id: antrean-baris-${TITENY_EVENT_ID}
