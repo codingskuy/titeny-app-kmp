@@ -12,3 +12,4 @@ Aturan menambah ADR:
 | ADR | Judul | Status |
 |---|---|---|
 | [ADR-0001](./ADR-0001-fondasi-teknis.md) | Fondasi teknis | Diterima |
+| [ADR-0004](./ADR-0004-uji-kontrak-pact-jvm.md) | Uji kontrak konsumen Pact JVM | Diterima |

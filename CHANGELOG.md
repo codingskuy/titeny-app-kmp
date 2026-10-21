@@ -8,6 +8,7 @@ Format: satu seksi per rilis, terbaru di atas. Wajib diperbarui pada setiap comm
 - Naikkan toolchain ke baseline FSD/30: Kotlin 2.2.20, Compose Multiplatform 1.10.0 (prasyarat Navigation3 1.1.x), Ktor 3.1.3, coroutines 1.10.2, AGP 8.7.2, Gradle 8.14.3.
 
 ### Ditambahkan
+- TTN-KMP-TEST-PACT: uji kontrak konsumen Pact JVM 4.6.21 untuk `ApiKlien` (7 interaksi: login, OTP, antrean, validasi 200/422, tahan, harga), berkas `pacts/`, ADR-0004 (keputusan dan fallback), `docs/testing/pact.md`.
 - TTN-KMP-005: ekspor CSV/XLSX massal (harga H+7, demand, panen) maks 50.000 baris per berkas, nama `titeny_<jenis>_YYYYMMDD_HHmm`, SHA-256 tiap berkas tercatat di jejak audit lokal (`jejak_ekspor`, append-only) dan manifest `.sha256`; Ctrl+E membuka layar Ekspor. Jejak akurasi belum dapat diekspor (tidak ada endpoint).
 - TTN-KMP-004: mode luring. Cache SQLDelight `%LOCALAPPDATA%/Titeny/analis.db` (maks 500 MB, pangkas > 90 hari FIFO, VACUUM mingguan), antrean aksi idempoten `aksi_id` terkirim saat daring, banner "Luring — data <stempel>", polling antrean 5 menit dan prediksi 15 menit, token analis di Windows Credential Manager (bukan berkas teks).
 - TTN-KMP-003: klien REST analis (login+OTP, refresh), layar Antrean Validasi (polling 5 menit + Segarkan) dan Detail Flag (setuju/koreksi_nilai/tolak, alasan 10-140), `POST /api/v1/analis/validasi` idempoten dengan `aksi_id`.
