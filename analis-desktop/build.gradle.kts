@@ -19,6 +19,7 @@ kotlin {
         val desktopMain by getting {
             dependencies {
                 implementation(compose.desktop.currentOs)
+                implementation(compose.material3)
                 implementation(libs.coroutines.core)
                 implementation(libs.ktor.client.core)
             }
