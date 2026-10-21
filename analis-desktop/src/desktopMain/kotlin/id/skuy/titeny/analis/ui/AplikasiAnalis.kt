@@ -9,11 +9,12 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.dp
@@ -25,9 +26,9 @@ import id.skuy.titeny.analis.nav.Rute
 private val tanpaAnimasi: () -> ContentTransform = { EnterTransition.None togetherWith ExitTransition.None }
 
 @Composable
-fun AplikasiAnalis(navigator: Navigator) {
+fun AplikasiAnalis(navigator: Navigator, layanan: Layanan) {
     Column(Modifier.fillMaxSize()) {
-        if (navigator.sudahMasuk) BilahNavigasi(navigator)
+        if (navigator.sudahMasuk) BilahNavigasi(navigator, layanan)
         NavDisplay(
             backStack = navigator.tumpukan,
             onBack = { navigator.kembali() },
@@ -35,9 +36,9 @@ fun AplikasiAnalis(navigator: Navigator) {
             popTransitionSpec = { tanpaAnimasi() },
             predictivePopTransitionSpec = { tanpaAnimasi() },
             entryProvider = entryProvider {
-                entry<Rute.Masuk> { LayarMasuk(navigator) }
-                entry<Rute.AntreanValidasi> { Placeholder("Antrean Validasi", "TTN-KMP-003") }
-                entry<Rute.DetailFlag> { Placeholder("Detail Flag ${it.eventId}", "TTN-KMP-003") }
+                entry<Rute.Masuk> { LayarMasuk(navigator, layanan) }
+                entry<Rute.AntreanValidasi> { LayarAntrean(navigator, layanan) }
+                entry<Rute.DetailFlag> { LayarDetailFlag(it.eventId, navigator, layanan) }
                 entry<Rute.TahanPrediksi> { Placeholder("Tahan Prediksi", "tiket lanjutan") }
                 entry<Rute.BandingModel> { Placeholder("Bandingkan Model", "tiket lanjutan") }
                 entry<Rute.KelolaRekomendasi> { Placeholder("Kelola Rekomendasi", "tiket lanjutan") }
@@ -48,24 +49,15 @@ fun AplikasiAnalis(navigator: Navigator) {
 }
 
 @Composable
-private fun BilahNavigasi(navigator: Navigator) {
+private fun BilahNavigasi(navigator: Navigator, layanan: Layanan) {
+    val scope = rememberCoroutineScope()
     Row(Modifier.padding(8.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         TextButton(onClick = { navigator.buka(Rute.AntreanValidasi) }, modifier = Modifier.testTag("nav-antrean")) { Text("Antrean Validasi") }
         TextButton(onClick = { navigator.buka(Rute.TahanPrediksi) }, modifier = Modifier.testTag("nav-tahan")) { Text("Tahan Prediksi") }
         TextButton(onClick = { navigator.buka(Rute.BandingModel) }, modifier = Modifier.testTag("nav-banding")) { Text("Bandingkan Model") }
         TextButton(onClick = { navigator.buka(Rute.KelolaRekomendasi) }, modifier = Modifier.testTag("nav-rekomendasi")) { Text("Kelola Rekomendasi") }
         TextButton(onClick = { navigator.buka(Rute.Ekspor) }, modifier = Modifier.testTag("nav-ekspor")) { Text("Ekspor (Ctrl+E)") }
-        TextButton(onClick = { navigator.keluar() }, modifier = Modifier.testTag("nav-keluar")) { Text("Keluar") }
-    }
-}
-
-@Composable
-private fun LayarMasuk(navigator: Navigator) {
-    Column(Modifier.padding(24.dp).testTag("layar-masuk"), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-        Text("Masuk analis", style = MaterialTheme.typography.headlineSmall)
-        // TODO(TTN-KMP-003): form username/password + OTP memakai POST /auth/login dan /auth/otp/verifikasi.
-        Text("Autentikasi dihubungkan di TTN-KMP-003; tombol ini sementara melewati login.")
-        Button(onClick = { navigator.masukBerhasil() }, modifier = Modifier.testTag("tombol-masuk")) { Text("Masuk (sementara)") }
+        TextButton(onClick = { scope.launch { layanan.api.keluar(); navigator.keluar() } }, modifier = Modifier.testTag("nav-keluar")) { Text("Keluar") }
     }
 }
 

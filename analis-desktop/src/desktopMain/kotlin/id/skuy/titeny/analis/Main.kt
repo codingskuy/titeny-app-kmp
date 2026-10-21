@@ -12,7 +12,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import androidx.compose.ui.window.rememberWindowState
+import id.skuy.titeny.analis.api.ApiKlien
+import id.skuy.titeny.analis.api.Konfigurasi
+import id.skuy.titeny.analis.api.PenyimpanTokenMemori
 import id.skuy.titeny.analis.nav.Navigator
+import id.skuy.titeny.analis.ui.Layanan
+import io.ktor.client.engine.cio.CIO
 import id.skuy.titeny.analis.nav.petaPintasan
 import id.skuy.titeny.analis.ui.AplikasiAnalis
 import java.awt.Desktop
@@ -24,6 +29,9 @@ const val TINGGI_MIN = 720
 
 fun main(args: Array<String>) = application {
     val navigator = remember { Navigator() }
+    val layanan = remember {
+        Layanan(ApiKlien(CIO.create(), Konfigurasi.urlApi(), PenyimpanTokenMemori()))
+    }
 
     LaunchedEffect(Unit) {
         // Windows mengirim tautan titeny:// sebagai argumen proses; OS lain lewat open-URI handler.
@@ -47,6 +55,6 @@ fun main(args: Array<String>) = application {
         },
     ) {
         LaunchedEffect(Unit) { window.minimumSize = Dimension(LEBAR_MIN, TINGGI_MIN) }
-        MaterialTheme { AplikasiAnalis(navigator) }
+        MaterialTheme { AplikasiAnalis(navigator, layanan) }
     }
 }
