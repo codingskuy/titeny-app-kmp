@@ -12,3 +12,4 @@ Aturan menambah ADR:
 | ADR | Judul | Status |
 |---|---|---|
 | [ADR-0001](./ADR-0001-fondasi-teknis.md) | Fondasi teknis | Diterima |
+| [ADR-0005](./ADR-0005-uji-e2e-maestro-dan-fallback-desktop.md) | Uji E2E: Maestro + fallback desktop | Diterima |
