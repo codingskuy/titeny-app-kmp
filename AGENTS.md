@@ -25,7 +25,7 @@ Rujukan versi: `https://github.com/Coding-Skuy/Titeny-TownHall/tree/main/platfor
 
 - Kotlin Multiplatform + Compose Multiplatform + **Navigation3**; target **Windows desktop (JVM 17) untuk analis** (`analis-desktop`) dan stub `baca-mobile` (Android+iOS, tidak dikirim di v1.0.0).
 - Lokal: SQLDelight (SQLite) di `%LOCALAPPDATA%/Titeny/analis.db` maks 500 MB; offline-first dengan antrean tulis `aksi_id` + retry. HTTP: Ktor 3.1.x.
-- Versi baseline (FSD/30): Kotlin 2.1.x, Compose 1.7.x, Navigation3 1.0.0, Ktor 3.1.x, SQLDelight 2.0.x. Kode kini Kotlin 2.0.20 / Ktor 3.0.0: naikkan ke baseline sebagai tugas terpisah.
+- Versi terkunci (ADR-0003): Compose Multiplatform 1.10.0, Navigation3 1.1.x (aktual 1.1.2), kotlinx-datetime 0.7.1, Kotlin 2.2.20, Ktor 3.1.x. Baseline FSD/30 (Kotlin 2.1.x, Compose 1.7.x, Navigation3 1.0.0) dinaikkan atas persetujuan koordinator/user.
 - **Dilarang**: framework UI selain Compose Multiplatform; menghitung model/harga/grade di klien; target macOS/Linux di v1.0.0; menyimpan token di berkas teks.
 
 Detail matriks: `versions/v1.0.0/docs/40-TECHSTACK.md`. Batas context: `versions/v1.0.0/docs/60-BLAST-RADIUS.md`.
