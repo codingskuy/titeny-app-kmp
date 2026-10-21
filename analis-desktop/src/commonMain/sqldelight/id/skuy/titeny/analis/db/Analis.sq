@@ -40,6 +40,26 @@ CREATE TABLE meta (
     nilai TEXT NOT NULL
 );
 
+-- Jejak ekspor: HANYA ditambah, tidak ada query ubah/hapus (audit tidak dapat dihapus analis dari aplikasi).
+CREATE TABLE jejak_ekspor (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    nama_berkas TEXT NOT NULL,
+    jenis TEXT NOT NULL,
+    format TEXT NOT NULL,
+    jumlah_baris INTEGER NOT NULL,
+    sha256 TEXT NOT NULL,
+    dibuat_pada INTEGER NOT NULL,
+    diserahkan_server INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX jejak_ekspor_waktu ON jejak_ekspor(dibuat_pada);
+
+catatEkspor:
+INSERT INTO jejak_ekspor(nama_berkas, jenis, format, jumlah_baris, sha256, dibuat_pada) VALUES (?, ?, ?, ?, ?, ?);
+
+semuaEkspor:
+SELECT * FROM jejak_ekspor ORDER BY id ASC;
+
 hapusAntreanCache:
 DELETE FROM antrean_cache;
 
