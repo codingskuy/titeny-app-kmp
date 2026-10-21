@@ -10,6 +10,7 @@ lifecycle = "2.10.0"
 serialization = "1.8.1"
 sqldelight = "2.1.0"
 jna = "5.16.0"
+pact = "4.6.21"
 
 [libraries]
 coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
@@ -24,6 +25,7 @@ serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-jso
 sqldelight-runtime = { module = "app.cash.sqldelight:runtime", version.ref = "sqldelight" }
 sqldelight-sqlite-driver = { module = "app.cash.sqldelight:sqlite-driver", version.ref = "sqldelight" }
 jna-platform = { module = "net.java.dev.jna:jna-platform", version.ref = "jna" }
+pact-consumer = { module = "au.com.dius.pact.consumer:junit", version.ref = "pact" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 
 [plugins]

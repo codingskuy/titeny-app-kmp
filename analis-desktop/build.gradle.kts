@@ -22,6 +22,8 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation(libs.coroutines.test)
                 implementation(libs.ktor.client.mock)
+                implementation(libs.pact.consumer)
+                implementation(libs.ktor.client.cio)
             }
         }
         val desktopMain by getting {
@@ -64,4 +66,12 @@ compose.desktop {
             }
         }
     }
+}
+
+// Uji konsumen Pact menulis berkas kontrak ke <root>/pacts (TTN-KMP-TEST-PACT).
+// Pact menggabungkan interaksi antartes ke satu berkas; hapus dulu agar tak ada interaksi basi.
+val direktoriPact = rootProject.layout.projectDirectory.dir("pacts")
+tasks.withType<Test>().configureEach {
+    systemProperty("pact.rootDir", direktoriPact.asFile.absolutePath)
+    doFirst { direktoriPact.asFile.listFiles()?.filter { it.extension == "json" }?.forEach { it.delete() } }
 }
