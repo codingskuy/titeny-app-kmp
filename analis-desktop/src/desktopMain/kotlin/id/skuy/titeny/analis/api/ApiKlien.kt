@@ -39,6 +39,12 @@ interface SumberPrediksi {
     suspend fun harga(komoditasId: String, pasarId: String, dari: String? = null, sampai: String? = null): Hasil<PrediksiHargaRespons>
 }
 
+/** Sumber data ekspor: prediksi harga, demand (GET /demand), dan panen (GET /panen, cursor). */
+interface SumberDataEkspor : SumberPrediksi {
+    suspend fun demand(komoditasId: String, zona: String, horizon: String = "H+7_total_kg"): Hasil<PrediksiDemand>
+    suspend fun panen(komoditasId: String, kabupatenId: String? = null, cursor: String? = null, limit: Int = 200): Hasil<PrediksiPanenRespons>
+}
+
 /** Sumber antrean validasi (diimplementasikan [ApiKlien]; dipisah agar pengelola dapat diuji tanpa jaringan). */
 interface SumberAntrean {
     suspend fun antrean(limit: Int = 50, cursor: String? = null): Hasil<AntreanValidasi>
@@ -69,7 +75,7 @@ class ApiKlien(
     private val baseUrl: String,
     private val penyimpan: PenyimpanToken,
     private val jam: () -> Long = System::currentTimeMillis,
-) : SumberAntrean, PengirimAksi, SumberPrediksi {
+) : SumberAntrean, PengirimAksi, SumberDataEkspor {
     private val json = FormatJson.json
 
     private val http = HttpClient(engine) {
@@ -163,6 +169,25 @@ class ApiKlien(
             parameter("pasar_id", pasarId)
             dari?.let { parameter("dari", it) }
             sampai?.let { parameter("sampai", it) }
+        }.keHasil()
+
+    override suspend fun demand(komoditasId: String, zona: String, horizon: String): Hasil<PrediksiDemand> =
+        kirim(auth = true) {
+            method = HttpMethod.Get
+            ke("/api/v1/demand")
+            parameter("komoditas_id", komoditasId)
+            parameter("zona", zona)
+            parameter("horizon", horizon)
+        }.keHasil()
+
+    override suspend fun panen(komoditasId: String, kabupatenId: String?, cursor: String?, limit: Int): Hasil<PrediksiPanenRespons> =
+        kirim(auth = true) {
+            method = HttpMethod.Get
+            ke("/api/v1/panen")
+            parameter("komoditas_id", komoditasId)
+            kabupatenId?.let { parameter("kabupaten_id", it) }
+            cursor?.let { parameter("cursor", it) }
+            parameter("limit", limit)
         }.keHasil()
 
     // ---------- internal

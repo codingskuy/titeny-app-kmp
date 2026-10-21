@@ -116,3 +116,36 @@ data class PrediksiHargaRespons(
     @SerialName("model_version") val modelVersion: String,
     @SerialName("dihitung_pada") val dihitungPada: String,
 )
+
+@Serializable
+data class PrediksiDemand(
+    @SerialName("komoditas_id") val komoditasId: String,
+    val zona: String,
+    val tanggal: String? = null,
+    val horizon: String,
+    @SerialName("demand_prediksi_kg") val demandPrediksiKg: Double,
+    @SerialName("rentang_bawah_kg") val rentangBawahKg: Double? = null,
+    @SerialName("rentang_atas_kg") val rentangAtasKg: Double? = null,
+    val sinyal: String,
+    val rekomendasi: List<String> = emptyList(),
+    @SerialName("model_version") val modelVersion: String,
+)
+
+@Serializable
+data class PrediksiPanen(
+    @SerialName("komoditas_id") val komoditasId: String,
+    @SerialName("kabupaten_id") val kabupatenId: String,
+    val minggu: String,
+    @SerialName("panen_prediksi_kg") val panenPrediksiKg: Long,
+    @SerialName("rentang_bawah_kg") val rentangBawahKg: Long? = null,
+    @SerialName("rentang_atas_kg") val rentangAtasKg: Long? = null,
+    val kepercayaan: String,
+    @SerialName("model_version") val modelVersion: String,
+)
+
+@Serializable
+data class PrediksiPanenRespons(
+    val deret: List<PrediksiPanen>,
+    @SerialName("dihitung_pada") val dihitungPada: String? = null,
+    @SerialName("next_cursor") val nextCursor: String? = null,
+)
