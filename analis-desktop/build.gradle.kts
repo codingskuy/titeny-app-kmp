@@ -5,12 +5,18 @@ plugins {
     alias(libs.plugins.compose.multiplatform)
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.sqldelight)
 }
 
 kotlin {
     jvm("desktop")
 
     sourceSets {
+        val commonMain by getting {
+            dependencies {
+                implementation(libs.sqldelight.runtime)
+            }
+        }
         val desktopTest by getting {
             dependencies {
                 implementation(kotlin("test"))
@@ -30,7 +36,17 @@ kotlin {
                 implementation(libs.ktor.client.content.negotiation)
                 implementation(libs.ktor.serialization.kotlinx.json)
                 implementation(libs.serialization.json)
+                implementation(libs.sqldelight.sqlite.driver)
+                implementation(libs.jna.platform)
             }
+        }
+    }
+}
+
+sqldelight {
+    databases {
+        create("AnalisDb") {
+            packageName.set("id.skuy.titeny.analis.db")
         }
     }
 }
